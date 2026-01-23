@@ -35,20 +35,31 @@ message LogEntry {
     string value = 3;
 }
 
-message AppEntriesRequest {
 
+message AppEntriesRequest {
+    int32 term = 1;                 // Leader's term
+    int32 leader_id = 2;            // Followers could use the information to redirect clients
+    int32 prev_log_index = 3;       // Index of log entry immediately preceding new ones
+    int32 prev_log_term = 4;        // Term of prev_log_index entry
+    repeated LogEntry entries = 5;  // Log entries to store (empty for heartbeat)
+    int32 leader_commit = 6;        //Leader's commit index
 }
 
 message AppEntriesResponse {
-
+    int32 term = 1;                 // Current term, for leader to update itself
+    bool success = 2;               // True if follower contained entry matching prev_log_index
 }
 
 message RequestVoteRequest {
-
+    int32 term = 1;                 // Candidate's term
+    int32 candidate_id = 2;         // Candidate requesting vote
+    int32 last_log_index = 3;       // Index of candidate's last log entry
+    int32 last_log_term = 4;        // Term of candidate's last log entry
 }
 
 message RequestVoteResponse {
-
+    int32 term = 1;                 // Current term, for candidate to update itself
+    bool vote_granted = 2;          // True means candidate received vote
 }
 
 // <===== Consensus Messages =====
@@ -56,19 +67,24 @@ message RequestVoteResponse {
 // ===== Client Messages =====>
 
 message PutRequest {
-
+    string key = 1;
+    string value = 2;
+    string request_id = 3;          // Unique id
 }
 
 message PutResponse {
-
+    bool success = 1;
+    int32 leader_id = 2;            // Hint to client if they contacted a follower
 }
 
 message GetRequest {
-
+    string key = 1;
 }
 
 message GetResponse {
-
+    bool found = 1;
+    string value = 2;
+    int32 leader_id = 3;            // Hint to client if they contacted a follower
 }
 
 // <===== Client Messages =====
